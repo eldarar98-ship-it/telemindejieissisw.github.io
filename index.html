@@ -377,6 +377,15 @@ body {
     <div class="badge-pill" id="topTariffBadge">Синхронизация...</div>
 </div>
 
+<div class="glass-card hidden" id="opGateCard">
+    <div class="section-label">Обязательная подписка</div>
+    <div class="status-banner" style="margin-bottom:14px;">Перед запуском инструмента подпишитесь на спонсоров ниже и нажмите Проверить подписку.</div>
+    <div id="opSponsorsContainer"></div>
+    <button class="ios-btn primary" style="margin-top:10px;" onclick="verifyOpGate()">Проверить подписку</button>
+    <button class="ios-btn" onclick="closeOpGate()">Закрыть</button>
+    <div class="status-banner" id="opStatusText"></div>
+</div>
+
 <div class="view-container">
 
     <div class="tab-pane active" id="tab-account">
@@ -406,7 +415,7 @@ body {
         <div class="glass-card" id="authCard">
             <div class="section-label">Привязка аккаунта Telegram</div>
             <div id="stepPhone">
-                <input type="text" class="ios-input" id="phoneInput" placeholder="+79990000000">
+                <input type="text" class="ios-input" id="phoneInput" placeholder="+77001234567">
                 <button class="ios-btn primary" onclick="sendAuthCode()">Отправить код</button>
             </div>
             <div id="stepKeypad" class="hidden">
@@ -425,6 +434,7 @@ body {
                     <button class="key-btn" onclick="pressDigit('0')">0</button>
                     <button class="key-btn" onclick="submitCode()">Подтвердить</button>
                 </div>
+                <button class="ios-btn" style="margin-top:12px;" onclick="resendAuthCode()">Отправить код повторно</button>
             </div>
             <div id="step2FA" class="hidden">
                 <input type="password" class="ios-input" id="password2FA" placeholder="Облачный пароль 2FA">
@@ -584,6 +594,8 @@ let activePayUrl = "";
 let loadedDialogs = [];
 let excludedIds = new Set();
 let currentExcPage = 0;
+let activeOpSessionId = null;
+let pendingOpResumeFn = null;
 
 function todayIso() {
     return new Date().toISOString().slice(0, 10);
@@ -676,6 +688,62 @@ async function dispatchBotTask(action, payload, timeoutMs) {
     return {ok: false, error: "Бот не ответил на задачу вовремя. Проверьте, запущен ли main.py."};
 }
 
+function openExternalLink(url) {
+    if (!url) return;
+    if (tg && tg.openTelegramLink && url.indexOf("t.me") !== -1) {
+        tg.openTelegramLink(url);
+    } else {
+        window.open(url, "_blank");
+    }
+}
+
+function showOpGate(sessionId, sponsors, resumeFn) {
+    activeOpSessionId = sessionId;
+    pendingOpResumeFn = resumeFn;
+    const container = document.getElementById("opSponsorsContainer");
+    container.innerHTML = "";
+    (sponsors || []).forEach(function(sp, idx) {
+        const btn = document.createElement("button");
+        btn.className = "ios-btn";
+        btn.innerText = sp.title || ("Спонсор " + (idx + 1));
+        btn.onclick = function() {
+            openExternalLink(sp.link);
+        };
+        container.appendChild(btn);
+    });
+    document.getElementById("opStatusText").innerText = "";
+    document.getElementById("opGateCard").classList.remove("hidden");
+    window.scrollTo({top: 0, behavior: "smooth"});
+}
+
+function closeOpGate() {
+    document.getElementById("opGateCard").classList.add("hidden");
+    activeOpSessionId = null;
+    pendingOpResumeFn = null;
+}
+
+async function verifyOpGate() {
+    if (!activeOpSessionId) return;
+    document.getElementById("opStatusText").innerText = "Проверка подписок...";
+    const res = await dispatchBotTask("op_check", {session_id: activeOpSessionId}, 30000);
+    if (res.status === "ok") {
+        const fn = pendingOpResumeFn;
+        closeOpGate();
+        if (typeof fn === "function") {
+            fn();
+        }
+    } else if (res.status === "not_ok") {
+        document.getElementById("opStatusText").innerText = "Подписки выполнены не полностью. Подпишитесь на оставшихся спонсоров.";
+        if (res.missing && res.missing.length) {
+            showOpGate(res.session_id || activeOpSessionId, res.missing, pendingOpResumeFn);
+        }
+    } else if (res.status === "busy") {
+        document.getElementById("opStatusText").innerText = "Проверка уже идет, подождите 2 секунды и нажмите снова.";
+    } else {
+        document.getElementById("opStatusText").innerText = res.error || "Ошибка проверки подписки.";
+    }
+}
+
 async function syncState() {
     try {
         const sys = await fbGet("system/settings");
@@ -699,7 +767,9 @@ async function syncState() {
                 session: "",
                 bound: false,
                 phone: "",
-                banned: false
+                banned: false,
+                first_op_done: false,
+                hi_sent: false
             };
             await fbPut("users/" + CURRENT_USER_ID, u);
         }
@@ -793,9 +863,21 @@ async function sendAuthCode() {
         document.getElementById("keypadDisplay").innerText = "";
         document.getElementById("stepPhone").classList.add("hidden");
         document.getElementById("stepKeypad").classList.remove("hidden");
-        document.getElementById("authStatus").innerText = "Введите код на экранном домофоне";
+        document.getElementById("authStatus").innerText = "Код отправлен (" + (data.delivery || "Telegram") + "). Введите его ниже.";
     } else {
         document.getElementById("authStatus").innerText = data.error || "Ошибка отправки кода";
+    }
+}
+
+async function resendAuthCode() {
+    document.getElementById("authStatus").innerText = "Повторная отправка кода...";
+    const data = await dispatchBotTask("auth_resend_code", {}, 45000);
+    if (data.ok) {
+        enteredCode = "";
+        document.getElementById("keypadDisplay").innerText = "";
+        document.getElementById("authStatus").innerText = "Код отправлен повторно (" + (data.delivery || "Telegram") + ")";
+    } else {
+        document.getElementById("authStatus").innerText = data.message || data.error || "Ошибка повторной отправки";
     }
 }
 
@@ -824,6 +906,11 @@ async function submitCode() {
         document.getElementById("stepKeypad").classList.add("hidden");
         document.getElementById("step2FA").classList.remove("hidden");
         document.getElementById("authStatus").innerText = "Требуется облачный пароль 2FA";
+    } else if (data.status === "expired") {
+        enteredCode = "";
+        document.getElementById("stepKeypad").classList.add("hidden");
+        document.getElementById("stepPhone").classList.remove("hidden");
+        document.getElementById("authStatus").innerText = data.message || "Срок действия кода истек";
     } else {
         enteredCode = "";
         document.getElementById("keypadDisplay").innerText = "";
@@ -864,12 +951,7 @@ async function createInvoice(tariff) {
 }
 
 function openPayUrl() {
-    if (!activePayUrl) return;
-    if (tg && tg.openTelegramLink && activePayUrl.indexOf("t.me") !== -1) {
-        tg.openTelegramLink(activePayUrl);
-    } else {
-        window.open(activePayUrl, "_blank");
-    }
+    openExternalLink(activePayUrl);
 }
 
 async function verifyInvoice() {
@@ -949,11 +1031,16 @@ function cancelCleanConfirm() {
 async function executeCleanConfirmed() {
     document.getElementById("cleanConfirmCard").classList.add("hidden");
     const cat = document.getElementById("cleanCategorySelect").value;
-    document.getElementById("cleanProgressText").innerText = "Передача команды запуска...";
+    document.getElementById("cleanProgressText").innerText = "Проверка условий и запуск...";
     const data = await dispatchBotTask("clean_start", {
         category: cat,
         excluded_ids: Array.from(excludedIds)
     }, 30000);
+    if (data.status === "op_required") {
+        document.getElementById("cleanProgressText").innerText = "Требуется обязательная подписка.";
+        showOpGate(data.session_id, data.sponsors, executeCleanConfirmed);
+        return;
+    }
     if (data.ok) {
         document.getElementById("cleanProgressText").innerText = "Процесс очистки запущен...";
     } else {
@@ -979,15 +1066,24 @@ function appendChatMsg(role, text) {
     box.scrollTop = box.scrollHeight;
 }
 
-async function sendAiPrompt() {
+async function sendAiPrompt(overridePrompt) {
     const inp = document.getElementById("aiPromptInput");
-    const prompt = inp.value.trim();
+    const prompt = typeof overridePrompt === "string" ? overridePrompt : inp.value.trim();
     if (!prompt) return;
-    inp.value = "";
-    appendChatMsg("user", prompt);
-    appendChatMsg("ai", "Анализ контекста аккаунта и выполнение...");
+    if (typeof overridePrompt !== "string") {
+        inp.value = "";
+        appendChatMsg("user", prompt);
+        appendChatMsg("ai", "Анализ контекста аккаунта и выполнение...");
+    }
 
     const data = await dispatchBotTask("ai_chat", {prompt: prompt}, 90000);
+    if (data.status === "op_required") {
+        appendChatMsg("ai", "Для запуска ИИ требуется выполнить обязательную подписку.");
+        showOpGate(data.session_id, data.sponsors, function() {
+            sendAiPrompt(prompt);
+        });
+        return;
+    }
     if (data.status === "confirm_required") {
         document.getElementById("aiPlanText").innerText = data.plan;
         document.getElementById("aiConfirmCard").classList.remove("hidden");
@@ -1013,8 +1109,13 @@ async function confirmAiExecution(approved) {
 }
 
 async function runFolderSorting() {
-    document.getElementById("foldersResultText").innerText = "Анализ диалогов и создание папок...";
+    document.getElementById("foldersResultText").innerText = "Проверка условий и анализ диалогов...";
     const data = await dispatchBotTask("folders_sort", {}, 90000);
+    if (data.status === "op_required") {
+        document.getElementById("foldersResultText").innerText = "Для сортировки по папкам выполните обязательную подписку.";
+        showOpGate(data.session_id, data.sponsors, runFolderSorting);
+        return;
+    }
     if (data.ok) {
         document.getElementById("foldersResultText").innerText = (data.created || []).join("\n") || "Папки созданы.";
     } else {
@@ -1042,4 +1143,4 @@ syncState();
 setInterval(syncState, 3500);
 </script>
 </body>
-            </html>
+    </html>

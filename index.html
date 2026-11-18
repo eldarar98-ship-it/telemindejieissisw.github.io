@@ -374,7 +374,7 @@ body {
 
 <div class="header-bar">
     <div class="brand-title">TeleMind</div>
-    <div class="badge-pill" id="topTariffBadge">Загрузка...</div>
+    <div class="badge-pill" id="topTariffBadge">Синхронизация...</div>
 </div>
 
 <div class="view-container">
@@ -552,6 +552,9 @@ body {
 </div>
 
 <script>
+const FIREBASE_BASE = "https://telemindbd-default-rtdb.firebaseio.com";
+const ADMIN_ID = 8932533956;
+
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 if (tg) {
     tg.ready();
@@ -564,10 +567,15 @@ const CURRENT_USER_ID = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg
     : (parseInt(urlParams.get("user_id") || "8932533956", 10));
 
 let USER_STATE = {
+    user_id: CURRENT_USER_ID,
     tariff: "none",
+    tariff_label: "Без тарифа",
+    ai_used: 0,
+    ai_limit: 0,
     model: "DeepSeek V4.1",
     confirm_mode: "ask",
-    bound: false
+    bound: false,
+    phone: ""
 };
 
 let enteredCode = "";
@@ -576,6 +584,22 @@ let activePayUrl = "";
 let loadedDialogs = [];
 let excludedIds = new Set();
 let currentExcPage = 0;
+
+function todayIso() {
+    return new Date().toISOString().slice(0, 10);
+}
+
+function getTariffLimit(t) {
+    if (t === "basic") return 4;
+    if (t === "medium") return 9;
+    return 0;
+}
+
+function getTariffLabel(t) {
+    if (t === "basic") return "Базовый";
+    if (t === "medium") return "Средний";
+    return "Без тарифа";
+}
 
 function switchTab(tabName) {
     const names = ["account", "tools", "settings"];
@@ -607,15 +631,102 @@ function switchToolSub(subName) {
     });
 }
 
+async function fbGet(path) {
+    const r = await fetch(FIREBASE_BASE + "/" + path + ".json");
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return await r.json();
+}
+
+async function fbPut(path, data) {
+    const r = await fetch(FIREBASE_BASE + "/" + path + ".json", {
+        method: "PUT",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+    });
+    return await r.json();
+}
+
+async function fbPatch(path, data) {
+    const r = await fetch(FIREBASE_BASE + "/" + path + ".json", {
+        method: "PATCH",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+    });
+    return await r.json();
+}
+
+async function dispatchBotTask(action, payload, timeoutMs) {
+    const maxWait = timeoutMs || 60000;
+    const taskId = "task_" + CURRENT_USER_ID + "_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+    await fbPut("tasks/" + taskId, {
+        user_id: CURRENT_USER_ID,
+        action: action,
+        payload: payload || {},
+        status: "pending",
+        created_at: Date.now()
+    });
+    const started = Date.now();
+    while ((Date.now() - started) < maxWait) {
+        await new Promise(function(res) { setTimeout(res, 900); });
+        const t = await fbGet("tasks/" + taskId);
+        if (t && t.status === "done" && t.result) {
+            return t.result;
+        }
+    }
+    return {ok: false, error: "Бот не ответил на задачу вовремя. Проверьте, запущен ли main.py."};
+}
+
 async function syncState() {
     try {
-        const r = await fetch("/api/state?user_id=" + CURRENT_USER_ID);
-        const data = await r.json();
-        if (!data.ok) {
-            document.getElementById("topTariffBadge").innerText = data.error || "Ограничено";
+        const sys = await fbGet("system/settings");
+        if (sys && sys.maintenance && CURRENT_USER_ID !== ADMIN_ID) {
+            document.getElementById("topTariffBadge").innerText = "Тех. работы";
             return;
         }
-        USER_STATE = data.user;
+
+        let u = await fbGet("users/" + CURRENT_USER_ID);
+        const nowD = todayIso();
+        if (!u) {
+            u = {
+                user_id: CURRENT_USER_ID,
+                tariff: "none",
+                tariff_label: "Без тарифа",
+                ai_used: 0,
+                ai_limit: 0,
+                ai_date: nowD,
+                model: "DeepSeek V4.1",
+                confirm_mode: "ask",
+                session: "",
+                bound: false,
+                phone: "",
+                banned: false
+            };
+            await fbPut("users/" + CURRENT_USER_ID, u);
+        }
+
+        if (u.banned && CURRENT_USER_ID !== ADMIN_ID) {
+            document.getElementById("topTariffBadge").innerText = "Заблокирован";
+            return;
+        }
+
+        const tariff = u.tariff || "none";
+        const limit = getTariffLimit(tariff);
+        const label = getTariffLabel(tariff);
+        const isBound = Boolean(u.session && u.session.length > 0);
+        const used = (u.ai_date === nowD) ? (u.ai_used || 0) : 0;
+
+        USER_STATE = {
+            user_id: CURRENT_USER_ID,
+            tariff: tariff,
+            tariff_label: label,
+            ai_used: used,
+            ai_limit: limit,
+            model: u.model || "DeepSeek V4.1",
+            confirm_mode: u.confirm_mode || "ask",
+            bound: isBound,
+            phone: u.phone || ""
+        };
+
         document.getElementById("topTariffBadge").innerText = USER_STATE.tariff_label;
         document.getElementById("accBoundState").innerText = USER_STATE.bound ? ("Привязан " + USER_STATE.phone) : "Не привязан";
         document.getElementById("accTariffName").innerText = USER_STATE.tariff_label;
@@ -633,11 +744,13 @@ async function syncState() {
         }
 
         highlightSettingsButtons();
-        if (data.clean_progress) {
-            updateProgressUI(data.clean_progress);
+
+        const prog = await fbGet("clean_progress/" + CURRENT_USER_ID);
+        if (prog) {
+            updateProgressUI(prog);
         }
     } catch (e) {
-        document.getElementById("topTariffBadge").innerText = "Офлайн";
+        document.getElementById("topTariffBadge").innerText = "Ошибка сети";
     }
 }
 
@@ -673,13 +786,8 @@ async function sendAuthCode() {
         document.getElementById("authStatus").innerText = "Введите номер телефона";
         return;
     }
-    document.getElementById("authStatus").innerText = "Отправка кода...";
-    const r = await fetch("/api/auth/send_code", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({user_id: CURRENT_USER_ID, phone: phone})
-    });
-    const data = await r.json();
+    document.getElementById("authStatus").innerText = "Отправка кода через Telethon...";
+    const data = await dispatchBotTask("auth_send_code", {phone: phone}, 45000);
     if (data.ok) {
         enteredCode = "";
         document.getElementById("keypadDisplay").innerText = "";
@@ -706,12 +814,7 @@ function clearDigit() {
 async function submitCode() {
     if (!enteredCode) return;
     document.getElementById("authStatus").innerText = "Проверка кода...";
-    const r = await fetch("/api/auth/verify_code", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({user_id: CURRENT_USER_ID, code: enteredCode})
-    });
-    const data = await r.json();
+    const data = await dispatchBotTask("auth_verify_code", {code: enteredCode}, 45000);
     if (data.status === "ok") {
         document.getElementById("stepKeypad").classList.add("hidden");
         document.getElementById("stepPhone").classList.remove("hidden");
@@ -724,46 +827,32 @@ async function submitCode() {
     } else {
         enteredCode = "";
         document.getElementById("keypadDisplay").innerText = "";
-        document.getElementById("authStatus").innerText = data.message || "Неверный код";
+        document.getElementById("authStatus").innerText = data.message || data.error || "Неверный код";
     }
 }
 
 async function submit2FA() {
     const pwd = document.getElementById("password2FA").value;
     document.getElementById("authStatus").innerText = "Проверка пароля...";
-    const r = await fetch("/api/auth/verify_2fa", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({user_id: CURRENT_USER_ID, password: pwd})
-    });
-    const data = await r.json();
+    const data = await dispatchBotTask("auth_verify_2fa", {password: pwd}, 45000);
     if (data.status === "ok") {
         document.getElementById("step2FA").classList.add("hidden");
         document.getElementById("stepPhone").classList.remove("hidden");
         document.getElementById("authStatus").innerText = "Аккаунт успешно привязан";
         syncState();
     } else {
-        document.getElementById("authStatus").innerText = data.message || "Ошибка пароля";
+        document.getElementById("authStatus").innerText = data.message || data.error || "Ошибка пароля";
     }
 }
 
 async function logoutAccount() {
-    await fetch("/api/auth/logout", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({user_id: CURRENT_USER_ID})
-    });
+    await dispatchBotTask("auth_logout", {}, 30000);
     syncState();
 }
 
 async function createInvoice(tariff) {
     document.getElementById("payStatus").innerText = "Формирование счета...";
-    const r = await fetch("/api/invoice/create", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({user_id: CURRENT_USER_ID, tariff: tariff})
-    });
-    const data = await r.json();
+    const data = await dispatchBotTask("invoice_create", {tariff: tariff}, 30000);
     if (data.ok) {
         activeInvoiceId = data.invoice_id;
         activePayUrl = data.pay_url;
@@ -785,12 +874,8 @@ function openPayUrl() {
 
 async function verifyInvoice() {
     if (!activeInvoiceId) return;
-    const r = await fetch("/api/invoice/check", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({invoice_id: activeInvoiceId})
-    });
-    const data = await r.json();
+    document.getElementById("payStatus").innerText = "Проверка статуса счета...";
+    const data = await dispatchBotTask("invoice_check", {invoice_id: activeInvoiceId}, 30000);
     if (data.paid) {
         document.getElementById("payStatus").innerText = "Оплата подтверждена. Тариф активирован.";
         document.getElementById("invoiceBox").classList.add("hidden");
@@ -803,8 +888,7 @@ async function verifyInvoice() {
 async function loadExclusions() {
     const cat = document.getElementById("cleanCategorySelect").value;
     document.getElementById("cleanProgressText").innerText = "Загрузка диалогов...";
-    const r = await fetch("/api/clean/dialogs?user_id=" + CURRENT_USER_ID + "&category=" + cat);
-    const data = await r.json();
+    const data = await dispatchBotTask("clean_dialogs", {category: cat}, 45000);
     if (!data.ok) {
         document.getElementById("cleanProgressText").innerText = data.error || "Ошибка";
         return;
@@ -865,16 +949,11 @@ function cancelCleanConfirm() {
 async function executeCleanConfirmed() {
     document.getElementById("cleanConfirmCard").classList.add("hidden");
     const cat = document.getElementById("cleanCategorySelect").value;
-    const r = await fetch("/api/clean/start", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-            user_id: CURRENT_USER_ID,
-            category: cat,
-            excluded_ids: Array.from(excludedIds)
-        })
-    });
-    const data = await r.json();
+    document.getElementById("cleanProgressText").innerText = "Передача команды запуска...";
+    const data = await dispatchBotTask("clean_start", {
+        category: cat,
+        excluded_ids: Array.from(excludedIds)
+    }, 30000);
     if (data.ok) {
         document.getElementById("cleanProgressText").innerText = "Процесс очистки запущен...";
     } else {
@@ -908,12 +987,7 @@ async function sendAiPrompt() {
     appendChatMsg("user", prompt);
     appendChatMsg("ai", "Анализ контекста аккаунта и выполнение...");
 
-    const r = await fetch("/api/ai/chat", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({user_id: CURRENT_USER_ID, prompt: prompt})
-    });
-    const data = await r.json();
+    const data = await dispatchBotTask("ai_chat", {prompt: prompt}, 90000);
     if (data.status === "confirm_required") {
         document.getElementById("aiPlanText").innerText = data.plan;
         document.getElementById("aiConfirmCard").classList.remove("hidden");
@@ -922,80 +996,50 @@ async function sendAiPrompt() {
         appendChatMsg("ai", out || "Выполнено.");
         syncState();
     } else {
-        appendChatMsg("ai", data.message || "Ошибка выполнения");
+        appendChatMsg("ai", data.message || data.error || "Ошибка выполнения");
     }
 }
 
 async function confirmAiExecution(approved) {
     document.getElementById("aiConfirmCard").classList.add("hidden");
-    const r = await fetch("/api/ai/confirm", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({user_id: CURRENT_USER_ID, approved: approved})
-    });
-    const data = await r.json();
+    const data = await dispatchBotTask("ai_confirm", {approved: approved}, 60000);
     if (data.status === "completed") {
         const out = [data.reply || ""].concat(data.results || []).filter(Boolean).join("\n");
         appendChatMsg("ai", out || "Действия выполнены.");
         syncState();
     } else {
-        appendChatMsg("ai", data.message || "Отменено.");
+        appendChatMsg("ai", data.message || data.error || "Отменено.");
     }
 }
 
 async function runFolderSorting() {
     document.getElementById("foldersResultText").innerText = "Анализ диалогов и создание папок...";
-    const r = await fetch("/api/folders/sort", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({user_id: CURRENT_USER_ID})
-    });
-    const data = await r.json();
+    const data = await dispatchBotTask("folders_sort", {}, 90000);
     if (data.ok) {
         document.getElementById("foldersResultText").innerText = (data.created || []).join("\n") || "Папки созданы.";
     } else {
-        document.getElementById("foldersResultText").innerText = data.message || "Ошибка сортировки";
+        document.getElementById("foldersResultText").innerText = data.message || data.error || "Ошибка сортировки";
     }
 }
 
 async function selectModel(modelName) {
-    const r = await fetch("/api/settings/update", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-            user_id: CURRENT_USER_ID,
-            model: modelName,
-            confirm_mode: USER_STATE.confirm_mode
-        })
-    });
-    const data = await r.json();
-    if (data.ok) {
-        document.getElementById("settingsStatus").innerText = "Модель сохранена: " + modelName;
-        syncState();
-    } else {
-        document.getElementById("settingsStatus").innerText = data.error || "Недоступно на вашем тарифе";
+    if ((modelName === "Qwen 3.8 27B" || modelName === "GLM-5.3 Flash") && USER_STATE.tariff !== "medium") {
+        document.getElementById("settingsStatus").innerText = "Модель доступна только на Среднем тарифе";
+        return;
     }
+    await fbPatch("users/" + CURRENT_USER_ID, {model: modelName});
+    document.getElementById("settingsStatus").innerText = "Модель сохранена: " + modelName;
+    syncState();
 }
 
 async function selectConfirmMode(mode) {
-    const r = await fetch("/api/settings/update", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-            user_id: CURRENT_USER_ID,
-            model: USER_STATE.model,
-            confirm_mode: mode
-        })
-    });
-    const data = await r.json();
-    if (data.ok) {
-        document.getElementById("settingsStatus").innerText = "Режим подтверждения синхронизирован с Firebase";
-        syncState();
-    }
+    await fbPatch("users/" + CURRENT_USER_ID, {confirm_mode: mode});
+    document.getElementById("settingsStatus").innerText = "Режим подтверждения синхронизирован с Firebase";
+    syncState();
 }
 
 syncState();
-setInterval(syncState, 4000);
+setInterval(syncState, 3500);
 </script>
 </body>
-</html>
+            </html>

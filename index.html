@@ -35,7 +35,7 @@ body {
         radial-gradient(circle at 84% 88%, rgba(55, 82, 130, 0.2) 0%, transparent 52%);
     color: var(--text-main);
     min-height: 100vh;
-    padding: 18px 16px 114px 16px;
+    padding: 18px 16px 118px 16px;
     overflow-x: hidden;
     user-select: none;
 }
@@ -88,7 +88,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 14px 18px;
-    margin-bottom: 18px;
+    margin-bottom: 12px;
     border-radius: 26px;
     background: var(--glass-surface);
     backdrop-filter: blur(28px) saturate(180%);
@@ -112,6 +112,60 @@ body {
     border: 1px solid var(--glass-border);
     color: var(--text-main);
     transition: transform 0.3s var(--spring), filter 0.3s var(--smooth);
+}
+
+.live-log-card {
+    background: rgba(8, 11, 16, 0.56);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 22px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.live-log-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.live-log-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+}
+
+.live-log-clear {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 8px;
+    transition: color 0.2s var(--smooth), transform 0.2s var(--spring);
+}
+
+.live-log-clear:active {
+    transform: scale(0.92);
+    color: var(--text-main);
+}
+
+.live-log-stream {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 11px;
+    line-height: 1.48;
+    color: rgba(226, 234, 248, 0.86);
+    max-height: 76px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 .view-container {
@@ -198,7 +252,7 @@ body {
 }
 
 .stat-value {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     letter-spacing: -0.3px;
 }
@@ -255,6 +309,15 @@ body {
     background: rgba(255, 78, 78, 0.3);
 }
 
+.ios-btn.compact {
+    width: auto;
+    padding: 8px 14px;
+    border-radius: 14px;
+    font-size: 12px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
 .ios-input {
     width: 100%;
     padding: 14px 16px;
@@ -271,6 +334,24 @@ body {
 .ios-input:focus {
     border-color: rgba(255, 255, 255, 0.42);
     background: rgba(0, 0, 0, 0.38);
+}
+
+.row-inline {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 12px;
+    font-size: 14px;
 }
 
 .keypad-display {
@@ -349,7 +430,7 @@ body {
     position: relative;
     z-index: 2;
     flex: 1;
-    padding: 10px 8px;
+    padding: 10px 6px;
     border-radius: 16px;
     border: none;
     background: transparent;
@@ -375,6 +456,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 10px;
     padding: 12px 14px;
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.045);
@@ -395,6 +477,37 @@ body {
     border-color: rgba(48, 128, 255, 0.55);
 }
 
+.list-card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 8px;
+}
+
+.list-card-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.list-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+    word-break: break-word;
+    margin-bottom: 3px;
+}
+
+.list-card-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    word-break: break-word;
+}
+
 .progress-track {
     width: 100%;
     height: 12px;
@@ -413,7 +526,7 @@ body {
 }
 
 .chat-box {
-    max-height: 290px;
+    max-height: 310px;
     overflow-y: auto;
     padding: 12px;
     border-radius: 20px;
@@ -429,6 +542,7 @@ body {
     font-size: 14px;
     line-height: 1.45;
     white-space: pre-wrap;
+    word-break: break-word;
     animation: iosCardPop 0.32s var(--spring) forwards;
 }
 
@@ -443,6 +557,24 @@ body {
     margin-right: 24px;
 }
 
+.chat-msg.clarifying {
+    border-color: rgba(48, 128, 255, 0.48);
+    background: rgba(48, 128, 255, 0.12);
+}
+
+.digest-output {
+    margin-top: 12px;
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(0, 0, 0, 0.26);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text-main);
+}
+
 .bottom-dock {
     position: fixed;
     bottom: 16px;
@@ -452,7 +584,7 @@ body {
     justify-content: space-around;
     padding: 8px;
     border-radius: 30px;
-    background: rgba(22, 26, 36, 0.62);
+    background: rgba(22, 26, 36, 0.65);
     backdrop-filter: blur(28px) saturate(180%);
     -webkit-backdrop-filter: blur(28px) saturate(180%);
     border: 1px solid var(--glass-border);
@@ -483,9 +615,9 @@ body {
     z-index: 2;
     flex: 1;
     text-align: center;
-    padding: 12px 0;
+    padding: 12px 2px;
     border-radius: 22px;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--text-muted);
     cursor: pointer;
@@ -523,6 +655,14 @@ body {
     <div class="badge-pill" id="topTariffBadge">Синхронизация...</div>
 </div>
 
+<div class="live-log-card">
+    <div class="live-log-head">
+        <div class="live-log-title">Live System Log</div>
+        <button class="live-log-clear" onclick="clearLiveLogView()">Clear</button>
+    </div>
+    <div class="live-log-stream" id="liveLogStream">[SYSTEM] Standby. Waiting for tool execution...</div>
+</div>
+
 <div class="glass-card hidden" id="opGateCard">
     <div class="section-label">Обязательная подписка</div>
     <div class="status-banner" style="margin-bottom:14px;">Перед запуском инструмента подпишитесь на спонсоров ниже и нажмите Проверить подписку.</div>
@@ -552,7 +692,7 @@ body {
                 </div>
                 <div class="stat-box">
                     <div class="stat-title">Активная модель</div>
-                    <div class="stat-value" id="accModelName">DeepSeek V4.1</div>
+                    <div class="stat-value" id="accModelName">Gemma 4 31B IT</div>
                 </div>
             </div>
             <button class="ios-btn danger hidden" id="btnLogout" onclick="logoutAccount()">Отвязать аккаунт</button>
@@ -592,7 +732,7 @@ body {
         <div class="glass-card">
             <div class="section-label">Тарифы Crypto Pay</div>
             <button class="ios-btn" onclick="createInvoice('basic')">Купить Базовый тариф — 19 RUB (4 правки/день)</button>
-            <button class="ios-btn primary" onclick="createInvoice('medium')">Купить Средний тариф — 49 RUB (9 правок/день + Папки)</button>
+            <button class="ios-btn primary" onclick="createInvoice('medium')">Купить Средний тариф — 49 RUB (9 правок + Автопилот + Папки)</button>
             <div id="invoiceBox" class="hidden" style="margin-top: 12px;">
                 <button class="ios-btn primary" id="btnPayLink" onclick="openPayUrl()">Перейти к оплате счета</button>
                 <button class="ios-btn" onclick="verifyInvoice()">Проверить оплату</button>
@@ -617,7 +757,6 @@ body {
                     <option value="groups">Очистить все группы</option>
                     <option value="bots">Очистить всех ботов</option>
                     <option value="private">Очистить все ЛС</option>
-                    <option value="deleted">Удалить все удаленные аккаунты</option>
                 </select>
                 <button class="ios-btn" onclick="loadExclusions()">Добавить исключения</button>
                 <button class="ios-btn primary" onclick="triggerCleanFlow()">Очистить выбранную категорию</button>
@@ -654,9 +793,9 @@ body {
 
         <div class="sub-pane hidden" id="tool-ai">
             <div class="glass-card">
-                <div class="section-label">ИИ диспетчер (65 инструментов Telethon)</div>
+                <div class="section-label" id="aiModelHeader">ИИ диспетчер (Telethon)</div>
                 <div class="chat-box" id="aiChatHistory">
-                    <div class="chat-msg ai">Готов к управлению аккаунтом. Опишите задачу, например: очисти все черновики, создай папку Работа или найди неактивные чаты за 30 дней.</div>
+                    <div class="chat-msg ai">Готов к управлению аккаунтом. Учитываю долговременную память и задаю уточняющие вопросы без списания лимита, если найдено несколько похожих чатов.</div>
                 </div>
                 <input type="text" class="ios-input" id="aiPromptInput" placeholder="Введите команду для ИИ...">
                 <button class="ios-btn primary" onclick="sendAiPrompt()">Отправить запрос</button>
@@ -684,12 +823,97 @@ body {
         </div>
     </div>
 
+    <div class="tab-pane" id="tab-autopilot">
+        <div class="sub-nav" id="apSubNav">
+            <div class="sub-nav-indicator" id="apSubNavIndicator"></div>
+            <button class="sub-nav-btn active" id="apbtn-triggers" onclick="switchApSub('triggers')">Триггеры</button>
+            <button class="sub-nav-btn" id="apbtn-briefings" onclick="switchApSub('briefings')">Брифинги</button>
+            <button class="sub-nav-btn" id="apbtn-memory" onclick="switchApSub('memory')">Память ИИ</button>
+        </div>
+
+        <div class="sub-pane" id="ap-triggers">
+            <div class="glass-card">
+                <div class="section-label">Автоответчик (Средний тариф)</div>
+                <select class="ios-input" id="arScopeSelect">
+                    <option value="all">Все личные чаты</option>
+                    <option value="contacts">Только контакты</option>
+                    <option value="non_contacts">Только не из контактов</option>
+                </select>
+                <input type="text" class="ios-input" id="arCustomScope" placeholder="Или укажите конкретный chat_id / username (необязательно)">
+                <input type="text" class="ios-input" id="arReplyText" placeholder="Текст автоответа...">
+                <input type="number" class="ios-input" id="arDurationInput" value="60" min="1" max="10080" placeholder="Длительность (минут)">
+                <button class="ios-btn primary" onclick="createAutoReplyUI()">Активировать автоответчик</button>
+            </div>
+
+            <div class="glass-card">
+                <div class="section-label">Радар ключевых слов (Средний тариф)</div>
+                <input type="text" class="ios-input" id="kwWordsInput" placeholder="Ключевые слова через запятую (срочно, оплата, заказ)">
+                <input type="number" class="ios-input" id="kwDurationInput" value="180" min="1" max="10080" placeholder="Длительность (минут)">
+                <button class="ios-btn primary" onclick="createKeywordRadarUI()">Запустить радар ключевых слов</button>
+                <div class="status-banner" id="apTriggersStatus"></div>
+            </div>
+
+            <div class="glass-card">
+                <div class="section-label">Активные правила автопилота</div>
+                <div id="apRulesList"></div>
+            </div>
+        </div>
+
+        <div class="sub-pane hidden" id="ap-briefings">
+            <div class="glass-card">
+                <div class="section-label">Расписание брифингов UTC+5 (Средний тариф)</div>
+                <input type="time" class="ios-input" id="brTimeInput" value="09:00">
+                <input type="text" class="ios-input" id="brFocusInput" placeholder="Фокус дайджеста (например: рабочие группы и новости)">
+                <div class="toggle-row">
+                    <span>Повторять ежедневно</span>
+                    <input type="checkbox" id="brRepeatCheck" checked style="width:20px; height:20px; accent-color: rgb(255,255,255);">
+                </div>
+                <button class="ios-btn primary" onclick="createBriefingUI()">Запланировать брифинг</button>
+                <div class="status-banner" id="apBriefingStatus"></div>
+            </div>
+
+            <div class="glass-card">
+                <div class="section-label">Мгновенный дайджест (Средний тариф)</div>
+                <input type="text" class="ios-input" id="instantDigestFocus" placeholder="Тема или категория чатов для сводки...">
+                <button class="ios-btn primary" onclick="runInstantDigestUI()">Сформировать дайджест сейчас</button>
+                <div class="digest-output hidden" id="instantDigestOutput"></div>
+            </div>
+
+            <div class="glass-card">
+                <div class="section-label">Запланированные брифинги</div>
+                <div id="apBriefingsList"></div>
+            </div>
+        </div>
+
+        <div class="sub-pane hidden" id="ap-memory">
+            <div class="glass-card">
+                <div class="section-label">Долговременная память ИИ (до 20 правил)</div>
+                <div class="status-banner" style="margin-bottom:12px;">
+                    ИИ всегда загружает эти правила перед каждым запросом. Используйте для белых списков чатов, запретов и стиля ответов.
+                </div>
+                <input type="text" class="ios-input" id="memoryRuleInput" placeholder="Например: Никогда не выходи из чата Семья и Рабочий">
+                <button class="ios-btn primary" onclick="addMemoryRuleUI()">Сохранить правило в память</button>
+                <div class="status-banner" id="memoryStatusText"></div>
+            </div>
+
+            <div class="glass-card">
+                <div class="section-label" id="memoryCountLabel">Сохраненные правила (0 / 20)</div>
+                <div id="memoryRulesList"></div>
+            </div>
+        </div>
+    </div>
+
     <div class="tab-pane" id="tab-settings">
         <div class="glass-card">
-            <div class="section-label">Модель искусственного интеллекта</div>
-            <button class="ios-btn" id="mdl-deepseek" onclick="selectModel('DeepSeek V4.1')">DeepSeek V4.1 (Базовый и Средний)</button>
-            <button class="ios-btn" id="mdl-qwen" onclick="selectModel('Qwen 3.8 27B')">Qwen 3.8 27B (Только Средний)</button>
-            <button class="ios-btn" id="mdl-glm" onclick="selectModel('GLM-5.3 Flash')">GLM-5.3 Flash (Только Средний)</button>
+            <div class="section-label">Модели: Базовый и Средний тарифы</div>
+            <button class="ios-btn" id="mdl-Gemma-4-31B-IT" onclick="selectModel('Gemma-4-31B-IT')">Gemma 4 31B IT (Контекст 128K)</button>
+            <button class="ios-btn" id="mdl-GLM-5.3-Flash" onclick="selectModel('GLM-5.3-Flash')">GLM-5.3 Flash (Контекст 256K)</button>
+        </div>
+
+        <div class="glass-card">
+            <div class="section-label">Модели: Средний тариф и выше</div>
+            <button class="ios-btn" id="mdl-MiMo-V2.6-Flash" onclick="selectModel('MiMo-V2.6-Flash')">MiMo V2.6 Flash (Контекст 1M — до 180 чатов)</button>
+            <button class="ios-btn" id="mdl-Qwen3.8-27B" onclick="selectModel('Qwen3.8-27B')">Qwen 3.8 27B (Контекст 256K)</button>
         </div>
 
         <div class="glass-card">
@@ -706,12 +930,21 @@ body {
     <div class="dock-indicator" id="dockIndicator"></div>
     <div class="dock-item active" id="dock-account" onclick="switchTab('account')">Аккаунт</div>
     <div class="dock-item" id="dock-tools" onclick="switchTab('tools')">Инструменты</div>
+    <div class="dock-item" id="dock-autopilot" onclick="switchTab('autopilot')">Автопилот</div>
     <div class="dock-item" id="dock-settings" onclick="switchTab('settings')">Настройки</div>
 </div>
 
 <script>
 const FIREBASE_BASE = "https://telemindbd-default-rtdb.firebaseio.com";
 const ADMIN_ID = 8932533956;
+const DEFAULT_MODEL_ID = "Gemma-4-31B-IT";
+
+const MODELS_CATALOG = [
+    {id: "Gemma-4-31B-IT", label: "Gemma 4 31B IT", tier: "basic", ctxLabel: "128K", maxDialogs: 75},
+    {id: "GLM-5.3-Flash", label: "GLM-5.3 Flash", tier: "basic", ctxLabel: "256K", maxDialogs: 75},
+    {id: "MiMo-V2.6-Flash", label: "MiMo V2.6 Flash", tier: "medium", ctxLabel: "1M", maxDialogs: 180},
+    {id: "Qwen3.8-27B", label: "Qwen 3.8 27B", tier: "medium", ctxLabel: "256K", maxDialogs: 75}
+];
 
 const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 if (tg) {
@@ -730,16 +963,18 @@ let USER_STATE = {
     tariff_label: "Без тарифа",
     ai_used: 0,
     ai_limit: 0,
-    model: "DeepSeek V4.1",
+    model: DEFAULT_MODEL_ID,
     confirm_mode: "ask",
     bound: false,
     phone: ""
 };
 
 let activeTabName = "account";
-let activeSubName = "clean";
+let activeToolSubName = "clean";
+let activeApSubName = "triggers";
 let tabAnimTimer = null;
-let subAnimTimer = null;
+let toolSubAnimTimer = null;
+let apSubAnimTimer = null;
 let enteredCode = "";
 let activeInvoiceId = null;
 let activePayUrl = "";
@@ -748,6 +983,18 @@ let excludedIds = new Set();
 let currentExcPage = 0;
 let activeOpSessionId = null;
 let pendingOpResumeFn = null;
+let liveLogHistory = [];
+let lastLiveLogRaw = "";
+let cachedMemoryRules = [];
+
+function findModelObj(idOrLabel) {
+    for (let i = 0; i < MODELS_CATALOG.length; i++) {
+        if (MODELS_CATALOG[i].id === idOrLabel || MODELS_CATALOG[i].label === idOrLabel) {
+            return MODELS_CATALOG[i];
+        }
+    }
+    return MODELS_CATALOG[0];
+}
 
 function triggerHaptic(type) {
     try {
@@ -820,8 +1067,10 @@ function updateIndicator(containerId, indicatorId, activeEl, animateGlide) {
 function syncIndicators(animateGlide) {
     const dockActive = document.getElementById("dock-" + activeTabName);
     updateIndicator("bottomDock", "dockIndicator", dockActive, animateGlide);
-    const subActive = document.getElementById("subbtn-" + activeSubName);
-    updateIndicator("toolsSubNav", "subNavIndicator", subActive, animateGlide);
+    const toolActive = document.getElementById("subbtn-" + activeToolSubName);
+    updateIndicator("toolsSubNav", "subNavIndicator", toolActive, animateGlide);
+    const apActive = document.getElementById("apbtn-" + activeApSubName);
+    updateIndicator("apSubNav", "apSubNavIndicator", apActive, animateGlide);
 }
 
 function revealCard(el) {
@@ -830,6 +1079,25 @@ function revealCard(el) {
     el.classList.remove("card-reveal");
     void el.offsetWidth;
     el.classList.add("card-reveal");
+}
+
+function appendLiveLogLine(line) {
+    const clean = String(line || "").trim();
+    if (!clean || clean === lastLiveLogRaw) return;
+    lastLiveLogRaw = clean;
+    liveLogHistory.push(clean);
+    if (liveLogHistory.length > 14) {
+        liveLogHistory = liveLogHistory.slice(-14);
+    }
+    const stream = document.getElementById("liveLogStream");
+    stream.innerText = liveLogHistory.join("\n");
+    stream.scrollTop = stream.scrollHeight;
+}
+
+function clearLiveLogView() {
+    liveLogHistory = [];
+    lastLiveLogRaw = "";
+    document.getElementById("liveLogStream").innerText = "[SYSTEM] Log view cleared. Standby...";
 }
 
 function todayIso() {
@@ -854,7 +1122,7 @@ function switchTab(tabName) {
     const prevName = activeTabName;
     activeTabName = tabName;
 
-    const names = ["account", "tools", "settings"];
+    const names = ["account", "tools", "autopilot", "settings"];
     names.forEach(function(n) {
         const dock = document.getElementById("dock-" + n);
         if (n === tabName) {
@@ -886,7 +1154,7 @@ function switchTab(tabName) {
         nextPane.classList.remove("anim-in", "anim-out");
         void nextPane.offsetWidth;
         nextPane.classList.add("anim-in");
-        if (tabName === "tools") {
+        if (tabName === "tools" || tabName === "autopilot") {
             requestAnimationFrame(function() {
                 syncIndicators(false);
             });
@@ -895,10 +1163,10 @@ function switchTab(tabName) {
 }
 
 function switchToolSub(subName) {
-    if (subName === activeSubName) return;
+    if (subName === activeToolSubName) return;
     triggerHaptic("select");
-    const prevSub = activeSubName;
-    activeSubName = subName;
+    const prevSub = activeToolSubName;
+    activeToolSubName = subName;
 
     const subs = ["clean", "ai", "folders"];
     subs.forEach(function(s) {
@@ -911,7 +1179,7 @@ function switchToolSub(subName) {
     });
     updateIndicator("toolsSubNav", "subNavIndicator", document.getElementById("subbtn-" + subName), true);
 
-    if (subAnimTimer) clearTimeout(subAnimTimer);
+    if (toolSubAnimTimer) clearTimeout(toolSubAnimTimer);
 
     const prevBlock = document.getElementById("tool-" + prevSub);
     const nextBlock = document.getElementById("tool-" + subName);
@@ -927,7 +1195,49 @@ function switchToolSub(subName) {
     prevBlock.classList.remove("anim-in");
     prevBlock.classList.add("anim-out");
 
-    subAnimTimer = setTimeout(function() {
+    toolSubAnimTimer = setTimeout(function() {
+        prevBlock.classList.add("hidden");
+        prevBlock.classList.remove("anim-out");
+        nextBlock.classList.remove("hidden", "anim-in", "anim-out");
+        void nextBlock.offsetWidth;
+        nextBlock.classList.add("anim-in");
+    }, 150);
+}
+
+function switchApSub(subName) {
+    if (subName === activeApSubName) return;
+    triggerHaptic("select");
+    const prevSub = activeApSubName;
+    activeApSubName = subName;
+
+    const subs = ["triggers", "briefings", "memory"];
+    subs.forEach(function(s) {
+        const btn = document.getElementById("apbtn-" + s);
+        if (s === subName) {
+            btn.classList.add("active");
+        } else {
+            btn.classList.remove("active");
+        }
+    });
+    updateIndicator("apSubNav", "apSubNavIndicator", document.getElementById("apbtn-" + subName), true);
+
+    if (apSubAnimTimer) clearTimeout(apSubAnimTimer);
+
+    const prevBlock = document.getElementById("ap-" + prevSub);
+    const nextBlock = document.getElementById("ap-" + subName);
+
+    subs.forEach(function(s) {
+        if (s !== prevSub && s !== subName) {
+            const b = document.getElementById("ap-" + s);
+            b.classList.add("hidden");
+            b.classList.remove("anim-in", "anim-out");
+        }
+    });
+
+    prevBlock.classList.remove("anim-in");
+    prevBlock.classList.add("anim-out");
+
+    apSubAnimTimer = setTimeout(function() {
         prevBlock.classList.add("hidden");
         prevBlock.classList.remove("anim-out");
         nextBlock.classList.remove("hidden", "anim-in", "anim-out");
@@ -960,8 +1270,24 @@ async function fbPatch(path, data) {
     return await r.json();
 }
 
+async function fbDelete(path) {
+    const r = await fetch(FIREBASE_BASE + "/" + path + ".json", {
+        method: "DELETE"
+    });
+    return r.ok;
+}
+
+async function pollLiveLogOnce() {
+    try {
+        const line = await fbGet("users/" + CURRENT_USER_ID + "/live_log");
+        if (typeof line === "string" && line.length > 0) {
+            appendLiveLogLine(line);
+        }
+    } catch (e) {}
+}
+
 async function dispatchBotTask(action, payload, timeoutMs) {
-    const maxWait = timeoutMs || 60000;
+    const maxWait = timeoutMs || 210000;
     const taskId = "task_" + CURRENT_USER_ID + "_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
     await fbPut("tasks/" + taskId, {
         user_id: CURRENT_USER_ID,
@@ -972,13 +1298,15 @@ async function dispatchBotTask(action, payload, timeoutMs) {
     });
     const started = Date.now();
     while ((Date.now() - started) < maxWait) {
-        await new Promise(function(res) { setTimeout(res, 900); });
+        await new Promise(function(res) { setTimeout(res, 950); });
+        pollLiveLogOnce();
         const t = await fbGet("tasks/" + taskId);
         if (t && t.status === "done" && t.result) {
+            await pollLiveLogOnce();
             return t.result;
         }
     }
-    return {ok: false, error: "Бот не ответил на задачу вовремя. Проверьте, запущен ли main.py."};
+    return {ok: false, error: "Бот не ответил на задачу вовремя. Проверьте, запущен ли сервер."};
 }
 
 function openExternalLink(url) {
@@ -1035,6 +1363,143 @@ async function verifyOpGate() {
     }
 }
 
+function renderAutopilotRules(rulesObj) {
+    const container = document.getElementById("apRulesList");
+    container.innerHTML = "";
+    const nowSec = Math.floor(Date.now() / 1000);
+    const keys = rulesObj && typeof rulesObj === "object" ? Object.keys(rulesObj) : [];
+    const activeEntries = [];
+    keys.forEach(function(k) {
+        const item = rulesObj[k];
+        if (item && typeof item === "object" && (item.expires_at || 0) > nowSec) {
+            activeEntries.push(item);
+        }
+    });
+
+    if (activeEntries.length === 0) {
+        container.innerHTML = '<div class="status-banner" style="margin-top:0;">Активных правил автопилота нет.</div>';
+        return;
+    }
+
+    activeEntries.forEach(function(r) {
+        const remMin = Math.max(1, Math.ceil(((r.expires_at || nowSec) - nowSec) / 60));
+        const row = document.createElement("div");
+        row.className = "list-card-row";
+        const body = document.createElement("div");
+        body.className = "list-card-body";
+        const title = document.createElement("div");
+        title.className = "list-card-title";
+        const meta = document.createElement("div");
+        meta.className = "list-card-meta";
+        if (r.type === "auto_reply") {
+            title.innerText = "Автоответчик (" + (r.target_scope || "all") + ")";
+            meta.innerText = "Текст: " + (r.reply_text || "") + " | Осталось: " + remMin + " мин | ID: " + r.id;
+        } else {
+            const kws = Array.isArray(r.keywords) ? r.keywords.join(", ") : "";
+            title.innerText = "Радар ключевых слов";
+            meta.innerText = "Слова: " + kws + " | Осталось: " + remMin + " мин | ID: " + r.id;
+        }
+        body.appendChild(title);
+        body.appendChild(meta);
+
+        const delBtn = document.createElement("button");
+        delBtn.className = "ios-btn danger compact";
+        delBtn.innerText = "Стоп";
+        delBtn.onclick = function() {
+            stopAutopilotRuleUI(r.id);
+        };
+
+        row.appendChild(body);
+        row.appendChild(delBtn);
+        container.appendChild(row);
+    });
+}
+
+function renderAutopilotBriefings(brObj) {
+    const container = document.getElementById("apBriefingsList");
+    container.innerHTML = "";
+    const keys = brObj && typeof brObj === "object" ? Object.keys(brObj) : [];
+    const list = [];
+    keys.forEach(function(k) {
+        if (brObj[k] && typeof brObj[k] === "object") {
+            list.push(brObj[k]);
+        }
+    });
+
+    if (list.length === 0) {
+        container.innerHTML = '<div class="status-banner" style="margin-top:0;">Запланированных брифингов нет.</div>';
+        return;
+    }
+
+    list.forEach(function(b) {
+        const row = document.createElement("div");
+        row.className = "list-card-row";
+        const body = document.createElement("div");
+        body.className = "list-card-body";
+        const title = document.createElement("div");
+        title.className = "list-card-title";
+        title.innerText = (b.time_hhmm || "09:00") + " UTC+5 (" + (b.repeat_daily ? "Ежедневно" : "Однократно") + ")";
+        const meta = document.createElement("div");
+        meta.className = "list-card-meta";
+        meta.innerText = "Фокус: " + (b.focus || "все чаты") + " | ID: " + b.id;
+        body.appendChild(title);
+        body.appendChild(meta);
+
+        const delBtn = document.createElement("button");
+        delBtn.className = "ios-btn danger compact";
+        delBtn.innerText = "Удалить";
+        delBtn.onclick = function() {
+            deleteBriefingUI(b.id);
+        };
+
+        row.appendChild(body);
+        row.appendChild(delBtn);
+        container.appendChild(row);
+    });
+}
+
+function renderMemoryRules(rawMemory) {
+    const rules = [];
+    if (Array.isArray(rawMemory)) {
+        rawMemory.forEach(function(item) {
+            if (item) rules.push(String(item));
+        });
+    } else if (rawMemory && typeof rawMemory === "object") {
+        Object.keys(rawMemory).sort().forEach(function(k) {
+            if (rawMemory[k]) rules.push(String(rawMemory[k]));
+        });
+    }
+    cachedMemoryRules = rules;
+    document.getElementById("memoryCountLabel").innerText = "Сохраненные правила (" + rules.length + " / 20)";
+    const container = document.getElementById("memoryRulesList");
+    container.innerHTML = "";
+    if (rules.length === 0) {
+        container.innerHTML = '<div class="status-banner" style="margin-top:0;">Долговременная память пуста.</div>';
+        return;
+    }
+    rules.forEach(function(ruleText, idx) {
+        const row = document.createElement("div");
+        row.className = "list-card-row";
+        const body = document.createElement("div");
+        body.className = "list-card-body";
+        const title = document.createElement("div");
+        title.className = "list-card-title";
+        title.innerText = "[" + idx + "] " + ruleText;
+        body.appendChild(title);
+
+        const delBtn = document.createElement("button");
+        delBtn.className = "ios-btn danger compact";
+        delBtn.innerText = "Удалить";
+        delBtn.onclick = function() {
+            deleteMemoryRuleUI(idx);
+        };
+
+        row.appendChild(body);
+        row.appendChild(delBtn);
+        container.appendChild(row);
+    });
+}
+
 async function syncState() {
     try {
         const sys = await fbGet("system/settings");
@@ -1053,14 +1518,15 @@ async function syncState() {
                 ai_used: 0,
                 ai_limit: 0,
                 ai_date: nowD,
-                model: "DeepSeek V4.1",
+                model: DEFAULT_MODEL_ID,
                 confirm_mode: "ask",
                 session: "",
                 bound: false,
                 phone: "",
                 banned: false,
                 first_op_done: false,
-                hi_sent: false
+                hi_sent: false,
+                live_log: ""
             };
             await fbPut("users/" + CURRENT_USER_ID, u);
         }
@@ -1075,6 +1541,10 @@ async function syncState() {
         const label = getTariffLabel(tariff);
         const isBound = Boolean(u.session && u.session.length > 0);
         const used = (u.ai_date === nowD) ? (u.ai_used || 0) : 0;
+        let modelObj = findModelObj(u.model || DEFAULT_MODEL_ID);
+        if (modelObj.tier === "medium" && tariff !== "medium") {
+            modelObj = findModelObj(DEFAULT_MODEL_ID);
+        }
 
         USER_STATE = {
             user_id: CURRENT_USER_ID,
@@ -1082,7 +1552,7 @@ async function syncState() {
             tariff_label: label,
             ai_used: used,
             ai_limit: limit,
-            model: u.model || "DeepSeek V4.1",
+            model: modelObj.id,
             confirm_mode: u.confirm_mode || "ask",
             bound: isBound,
             phone: u.phone || ""
@@ -1092,7 +1562,9 @@ async function syncState() {
         document.getElementById("accBoundState").innerText = USER_STATE.bound ? ("Привязан " + USER_STATE.phone) : "Не привязан";
         document.getElementById("accTariffName").innerText = USER_STATE.tariff_label;
         document.getElementById("accAiQuota").innerText = USER_STATE.ai_used + " / " + USER_STATE.ai_limit;
-        document.getElementById("accModelName").innerText = USER_STATE.model;
+        document.getElementById("accModelName").innerText = modelObj.label;
+        document.getElementById("aiModelHeader").innerText =
+            "ИИ диспетчер (" + modelObj.label + " | " + modelObj.ctxLabel + " | до " + modelObj.maxDialogs + " чатов)";
 
         const authCard = document.getElementById("authCard");
         const btnLogout = document.getElementById("btnLogout");
@@ -1104,7 +1576,15 @@ async function syncState() {
             btnLogout.classList.add("hidden");
         }
 
+        if (typeof u.live_log === "string" && u.live_log.length > 0) {
+            appendLiveLogLine(u.live_log);
+        }
+
         highlightSettingsButtons();
+        renderMemoryRules(u.ai_memory);
+        const ap = u.autopilot || {};
+        renderAutopilotRules(ap.rules);
+        renderAutopilotBriefings(ap.briefings);
 
         const prog = await fbGet("clean_progress/" + CURRENT_USER_ID);
         if (prog) {
@@ -1116,14 +1596,10 @@ async function syncState() {
 }
 
 function highlightSettingsButtons() {
-    const models = [
-        {id: "mdl-deepseek", name: "DeepSeek V4.1"},
-        {id: "mdl-qwen", name: "Qwen 3.8 27B"},
-        {id: "mdl-glm", name: "GLM-5.3 Flash"}
-    ];
-    models.forEach(function(m) {
-        const el = document.getElementById(m.id);
-        if (USER_STATE.model === m.name) {
+    MODELS_CATALOG.forEach(function(m) {
+        const el = document.getElementById("mdl-" + m.id);
+        if (!el) return;
+        if (USER_STATE.model === m.id) {
             el.classList.add("primary");
         } else {
             el.classList.remove("primary");
@@ -1348,13 +1824,14 @@ function updateProgressUI(prog) {
     }
 }
 
-function appendChatMsg(role, text) {
+function appendChatMsg(role, text, extraClass) {
     const box = document.getElementById("aiChatHistory");
     const div = document.createElement("div");
-    div.className = "chat-msg " + role;
-    div.innerText = text;
+    div.className = "chat-msg " + role + (extraClass ? (" " + extraClass) : "");
+    div.innerText = String(text || "").trim();
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
+    return div;
 }
 
 async function sendAiPrompt(overridePrompt) {
@@ -1364,44 +1841,54 @@ async function sendAiPrompt(overridePrompt) {
     if (typeof overridePrompt !== "string") {
         inp.value = "";
         appendChatMsg("user", prompt);
-        appendChatMsg("ai", "Анализ контекста аккаунта и выполнение...");
     }
+    const loader = appendChatMsg("ai", "Анализ контекста аккаунта и выполнение...");
 
-    const data = await dispatchBotTask("ai_chat", {prompt: prompt}, 90000);
+    const data = await dispatchBotTask("ai_chat", {prompt: prompt}, 210000);
     if (data.status === "op_required") {
-        appendChatMsg("ai", "Для запуска ИИ требуется выполнить обязательную подписку.");
+        loader.innerText = "Для запуска ИИ требуется выполнить обязательную подписку.";
         showOpGate(data.session_id, data.sponsors, function() {
             sendAiPrompt(prompt);
         });
         return;
     }
     if (data.status === "confirm_required") {
+        loader.innerText = "Требуется подтверждение действий ниже.";
         document.getElementById("aiPlanText").innerText = data.plan;
         revealCard(document.getElementById("aiConfirmCard"));
     } else if (data.status === "completed") {
-        const out = [data.reply || ""].concat(data.results || []).filter(Boolean).join("\n");
-        appendChatMsg("ai", out || "Выполнено.");
+        const cleanReply = String(data.reply || "").trim();
+        if (data.clarifying) {
+            loader.classList.add("clarifying");
+            loader.innerText = cleanReply + "\n\n(Уточняющий вопрос — лимит правок не списан)";
+        } else {
+            loader.innerText = cleanReply || "Выполнено.";
+        }
         syncState();
     } else {
-        appendChatMsg("ai", data.message || data.error || "Ошибка выполнения");
+        loader.innerText = String(data.message || data.error || "Ошибка выполнения").trim();
     }
+    const box = document.getElementById("aiChatHistory");
+    box.scrollTop = box.scrollHeight;
 }
 
 async function confirmAiExecution(approved) {
     document.getElementById("aiConfirmCard").classList.add("hidden");
-    const data = await dispatchBotTask("ai_confirm", {approved: approved}, 60000);
+    const loader = appendChatMsg("ai", approved ? "Выполнение подтвержденных действий..." : "Отмена действий...");
+    const data = await dispatchBotTask("ai_confirm", {approved: approved}, 210000);
     if (data.status === "completed") {
-        const out = [data.reply || ""].concat(data.results || []).filter(Boolean).join("\n");
-        appendChatMsg("ai", out || "Действия выполнены.");
+        loader.innerText = String(data.reply || "Действия выполнены.").trim();
         syncState();
     } else {
-        appendChatMsg("ai", data.message || data.error || "Отменено.");
+        loader.innerText = String(data.message || "Отменено.").trim();
     }
+    const box = document.getElementById("aiChatHistory");
+    box.scrollTop = box.scrollHeight;
 }
 
 async function runFolderSorting() {
     document.getElementById("foldersResultText").innerText = "Проверка условий и анализ диалогов...";
-    const data = await dispatchBotTask("folders_sort", {}, 90000);
+    const data = await dispatchBotTask("folders_sort", {}, 210000);
     if (data.status === "op_required") {
         document.getElementById("foldersResultText").innerText = "Для сортировки по папкам выполните обязательную подписку.";
         showOpGate(data.session_id, data.sponsors, runFolderSorting);
@@ -1414,13 +1901,179 @@ async function runFolderSorting() {
     }
 }
 
-async function selectModel(modelName) {
-    if ((modelName === "Qwen 3.8 27B" || modelName === "GLM-5.3 Flash") && USER_STATE.tariff !== "medium") {
-        document.getElementById("settingsStatus").innerText = "Модель доступна только на Среднем тарифе";
+async function createAutoReplyUI() {
+    if (USER_STATE.tariff !== "medium") {
+        document.getElementById("apTriggersStatus").innerText = "Автоответчик доступен только на Среднем тарифе.";
         return;
     }
-    await fbPatch("users/" + CURRENT_USER_ID, {model: modelName});
-    document.getElementById("settingsStatus").innerText = "Модель сохранена: " + modelName;
+    if (!USER_STATE.bound) {
+        document.getElementById("apTriggersStatus").innerText = "Сначала привяжите аккаунт Telegram.";
+        return;
+    }
+    const customScope = document.getElementById("arCustomScope").value.trim();
+    const targetScope = customScope || document.getElementById("arScopeSelect").value;
+    const replyText = document.getElementById("arReplyText").value.trim();
+    const duration = Math.max(1, Math.min(parseInt(document.getElementById("arDurationInput").value || "60", 10), 10080));
+    if (!replyText) {
+        document.getElementById("apTriggersStatus").innerText = "Введите текст автоответа.";
+        return;
+    }
+    const nowSec = Math.floor(Date.now() / 1000);
+    const ruleId = "ar_" + nowSec + "_" + Math.floor(100 + Math.random() * 900);
+    await fbPut("users/" + CURRENT_USER_ID + "/autopilot/rules/" + ruleId, {
+        id: ruleId,
+        type: "auto_reply",
+        target_scope: targetScope,
+        reply_text: replyText,
+        duration_minutes: duration,
+        created_at: nowSec,
+        expires_at: nowSec + (duration * 60),
+        replied_senders: {}
+    });
+    document.getElementById("arReplyText").value = "";
+    document.getElementById("arCustomScope").value = "";
+    document.getElementById("apTriggersStatus").innerText = "Автоответчик запущен (ID " + ruleId + ").";
+    syncState();
+}
+
+async function createKeywordRadarUI() {
+    if (USER_STATE.tariff !== "medium") {
+        document.getElementById("apTriggersStatus").innerText = "Радар ключевых слов доступен только на Среднем тарифе.";
+        return;
+    }
+    if (!USER_STATE.bound) {
+        document.getElementById("apTriggersStatus").innerText = "Сначала привяжите аккаунт Telegram.";
+        return;
+    }
+    const rawWords = document.getElementById("kwWordsInput").value.trim();
+    const keywords = rawWords.split(",").map(function(w) { return w.trim().toLowerCase(); }).filter(Boolean);
+    const duration = Math.max(1, Math.min(parseInt(document.getElementById("kwDurationInput").value || "180", 10), 10080));
+    if (keywords.length === 0) {
+        document.getElementById("apTriggersStatus").innerText = "Укажите хотя бы одно ключевое слово.";
+        return;
+    }
+    const nowSec = Math.floor(Date.now() / 1000);
+    const ruleId = "kw_" + nowSec + "_" + Math.floor(100 + Math.random() * 900);
+    await fbPut("users/" + CURRENT_USER_ID + "/autopilot/rules/" + ruleId, {
+        id: ruleId,
+        type: "keyword_radar",
+        keywords: keywords.slice(0, 25),
+        duration_minutes: duration,
+        created_at: nowSec,
+        expires_at: nowSec + (duration * 60),
+        triggered_msgs: {}
+    });
+    document.getElementById("kwWordsInput").value = "";
+    document.getElementById("apTriggersStatus").innerText = "Радар ключевых слов запущен (ID " + ruleId + ").";
+    syncState();
+}
+
+async function stopAutopilotRuleUI(ruleId) {
+    await fbDelete("users/" + CURRENT_USER_ID + "/autopilot/rules/" + ruleId);
+    document.getElementById("apTriggersStatus").innerText = "Правило " + ruleId + " остановлено.";
+    syncState();
+}
+
+async function createBriefingUI() {
+    if (USER_STATE.tariff !== "medium") {
+        document.getElementById("apBriefingStatus").innerText = "Брифинги доступны только на Среднем тарифе.";
+        return;
+    }
+    if (!USER_STATE.bound) {
+        document.getElementById("apBriefingStatus").innerText = "Сначала привяжите аккаунт Telegram.";
+        return;
+    }
+    const timeVal = document.getElementById("brTimeInput").value.trim();
+    const focusVal = document.getElementById("brFocusInput").value.trim() || "все важные чаты и каналы";
+    const repeatVal = Boolean(document.getElementById("brRepeatCheck").checked);
+    if (!/^\d{2}:\d{2}$/.test(timeVal)) {
+        document.getElementById("apBriefingStatus").innerText = "Укажите время в формате HH:MM.";
+        return;
+    }
+    const nowSec = Math.floor(Date.now() / 1000);
+    const brId = "br_" + nowSec + "_" + Math.floor(100 + Math.random() * 900);
+    await fbPut("users/" + CURRENT_USER_ID + "/autopilot/briefings/" + brId, {
+        id: brId,
+        time_hhmm: timeVal,
+        focus: focusVal.slice(0, 200),
+        repeat_daily: repeatVal,
+        created_at: nowSec,
+        last_run_date: ""
+    });
+    document.getElementById("brFocusInput").value = "";
+    document.getElementById("apBriefingStatus").innerText = "Брифинг запланирован на " + timeVal + " UTC+5 (ID " + brId + ").";
+    syncState();
+}
+
+async function deleteBriefingUI(brId) {
+    await fbDelete("users/" + CURRENT_USER_ID + "/autopilot/briefings/" + brId);
+    document.getElementById("apBriefingStatus").innerText = "Брифинг " + brId + " удален.";
+    syncState();
+}
+
+async function runInstantDigestUI() {
+    if (USER_STATE.tariff !== "medium") {
+        document.getElementById("apBriefingStatus").innerText = "Мгновенный дайджест доступен только на Среднем тарифе.";
+        return;
+    }
+    const focus = document.getElementById("instantDigestFocus").value.trim() || "все свежие и непрочитанные сообщения";
+    const outEl = document.getElementById("instantDigestOutput");
+    outEl.innerText = "Сбор свежих сообщений и генерация дайджеста...";
+    revealCard(outEl);
+    const promptCmd = "Вызови инструмент run_instant_digest с параметром focus: " + focus;
+    const data = await dispatchBotTask("ai_chat", {prompt: promptCmd}, 210000);
+    if (data.status === "op_required") {
+        outEl.innerText = "Для запуска дайджеста выполните обязательную подписку.";
+        showOpGate(data.session_id, data.sponsors, runInstantDigestUI);
+        return;
+    }
+    if (data.status === "completed") {
+        outEl.innerText = String(data.reply || "Дайджест сформирован.").trim();
+        syncState();
+    } else {
+        outEl.innerText = String(data.message || data.error || "Ошибка формирования дайджеста").trim();
+    }
+}
+
+async function addMemoryRuleUI() {
+    const inp = document.getElementById("memoryRuleInput");
+    const ruleText = inp.value.trim();
+    if (!ruleText) {
+        document.getElementById("memoryStatusText").innerText = "Введите текст правила.";
+        return;
+    }
+    let nextRules = cachedMemoryRules.slice();
+    if (nextRules.indexOf(ruleText) !== -1) {
+        document.getElementById("memoryStatusText").innerText = "Такое правило уже есть в памяти.";
+        return;
+    }
+    if (nextRules.length >= 20) {
+        nextRules = nextRules.slice(-19);
+    }
+    nextRules.push(ruleText.slice(0, 240));
+    await fbPut("users/" + CURRENT_USER_ID + "/ai_memory", nextRules);
+    inp.value = "";
+    document.getElementById("memoryStatusText").innerText = "Правило сохранено и синхронизировано с ботом.";
+    syncState();
+}
+
+async function deleteMemoryRuleUI(idx) {
+    const nextRules = cachedMemoryRules.slice();
+    if (idx < 0 || idx >= nextRules.length) return;
+    nextRules.splice(idx, 1);
+    await fbPut("users/" + CURRENT_USER_ID + "/ai_memory", nextRules);
+    document.getElementById("memoryStatusText").innerText = "Правило [" + idx + "] удалено из памяти.";
+    syncState();
+}
+
+async function selectModel(modelId) {
+    const modelObj = findModelObj(modelId);
+    if (modelObj.tier === "medium" && USER_STATE.tariff !== "medium") {
+        document.getElementById("settingsStatus").innerText = "Модель " + modelObj.label + " доступна только на Среднем тарифе";
+        return;
+    }
+    await fbPatch("users/" + CURRENT_USER_ID, {model: modelObj.id});
+    document.getElementById("settingsStatus").innerText = "Модель сохранена: " + modelObj.label + " (" + modelObj.ctxLabel + ")";
     syncState();
 }
 
@@ -1438,7 +2091,7 @@ requestAnimationFrame(function() {
     syncIndicators(false);
 });
 syncState();
-setInterval(syncState, 3500);
+setInterval(syncState, 3000);
 </script>
 </body>
-    </html>
+</html>
